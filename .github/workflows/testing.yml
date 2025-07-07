@@ -1,0 +1,52 @@
+name: Issue PR Labeler
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  issues: write
+
+env: # <-- 여기에 전역 debug env
+  ACTIONS_RUNNER_DEBUG: true
+  ACTIONS_STEP_DEBUG: true
+
+jobs:
+  auto_labeling:
+    runs-on: ubuntu-latest
+    env: # <-- 또는 job 레벨에 넣어도 됩니다
+      ACTIONS_RUNNER_DEBUG: true
+      ACTIONS_STEP_DEBUG: true
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Issue PR Labeler
+        uses: hoho4190/issue-pr-labeler@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # token → repo-token
+          disable-bot: true
+          config-file-name: labeler-config.yml # config-file-name → config-path
+
+      - name: "Debug: 직접 레이블 추가 시도해보기"
+        if: failure() # 레이블러가 실패했을 때만 실행
+        shell: bash
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+          echo "▶️ 직접 POST /repos/$REPO/issues/$PR_NUM/labels"
+          HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$REPO/issues/$PR_NUM/labels \
+            -d '{"labels":["bug"]}')
+          echo "HTTP status: $HTTP_CODE"
+          echo "Response body:"
+          cat response.json
