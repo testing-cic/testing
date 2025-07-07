@@ -5,6 +5,16 @@ on:
     types:
       - opened
       - reopened
+
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+
+env:
+  ACTIONS_RUNNER_DEBUG: true # 러너 전체 디버그 로그
+  ACTIONS_STEP_DEBUG: true
+
 jobs:
   Auto_labeling_pr:
     if: ${{ github.event_name == 'pull_request' }}
@@ -24,4 +34,7 @@ jobs:
           config-file-name: labeler-config.yml
 
       - run: |
+          echo "  name:  ${{ github.event_name }}"
+          echo "  action:  ${{ github.event.action }}"
+          echo "  name:  ${{ github.event_name }}"
           echo "  action:  ${{ github.event.action }}"
