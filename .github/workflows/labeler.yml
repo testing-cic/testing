@@ -1,11 +1,6 @@
 name: Issue PR Labeler
 
 on:
-  pull_request:
-    types:
-      - opened
-      - reopened
-
   pull_request_target:
     types:
       - opened
@@ -32,8 +27,19 @@ jobs:
           disable-bot: true
           config-file-name: labeler-config.yml
 
-      - run: |
-          echo "  name:  ${{ github.event_name }}"
-          echo "  action:  ${{ github.event.action }}"
-          echo "  name:  ${{ github.event_name }}"
-          echo "  action:  ${{ github.event.action }}"
+      - name: "Debug: 직접 레이블 추가 시도해보기"
+        if: failure() # 레이블러가 실패했을 때만 실행
+        shell: bash
+        run: |
+          PR_NUM=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+          echo "▶️ 직접 POST /repos/$REPO/issues/$PR_NUM/labels"
+          HTTP_CODE=$(curl -s -o response.json -w "%{http_code}" \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/$REPO/issues/$PR_NUM/labels \
+            -d '{"labels":["bug"]}')
+          echo "HTTP status: $HTTP_CODE"
+          echo "Response body:"
+          cat response.json
