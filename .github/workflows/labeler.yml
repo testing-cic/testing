@@ -12,7 +12,7 @@ on:
       - reopened
 
 env:
-  ACTIONS_RUNNER_DEBUG: true # 러너 전체 디버그 로그
+  ACTIONS_RUNNER_DEBUG: true
   ACTIONS_STEP_DEBUG: true
 
 jobs:
