@@ -28,7 +28,7 @@ jobs:
           config-file-name: labeler-config.yml
 
       - name: "Debug: 직접 레이블 추가 시도해보기"
-        if: failure() # 레이블러가 실패했을 때만 실행
+
         shell: bash
         run: |
           PR_NUM=${{ github.event.pull_request.number }}
